@@ -38,68 +38,10 @@ addEventListener("message", eventListener);
 if (!window._flutter) {
   window._flutter = {};
 }
-_flutter.buildConfig = {"engineRevision":"a804b261645ef8c13eb3d5c44a5c2fb0340c5539","wasmHashes":{"canvaskit.wasm":"fbed517a43e82452404446683f00f2e876d835aed84410695759e67b6bb01cd3","chromium/canvaskit.wasm":"ae8ff1d858140f7b1300ced3fa89fb8c9dce0a400a0f4f1e11f6dcfb3315fdcf","skwasm.wasm":"e540fd5e8303b7b68ec2718cb49e9c421f8ade3075b15e02a7059a62654df9a1","skwasm_heavy.wasm":"565f5cc1cca6ab120f11934b105f01fec4b58b480c82e0889dca93af8e6f8635","webparagraph/canvaskit.wasm":"0ce1b05082efdc8529550e8a01f6ff0593972d55525035010e26f5600aa9f254","wimp.wasm":"e924eaafd801d41e017d178f3fd5cf8a417f641fe35c9ed34a4e1d7582283e0c","main.dart.wasm":"619d4a0f771f35bb141ae8bea8fa852e8756400ed330e744c7e3dd19cbd8d053"},"builds":[{"compileTarget":"dart2wasm","renderer":"skwasm","mainWasmPath":"main.dart.wasm","jsSupportRuntimePath":"main.dart.mjs"},{"compileTarget":"dart2js","renderer":"canvaskit","mainJsPath":"main.dart.js"}],"useLocalCanvasKit":true};
+_flutter.buildConfig = {"engineRevision":"a804b261645ef8c13eb3d5c44a5c2fb0340c5539","wasmHashes":{"canvaskit.wasm":"fbed517a43e82452404446683f00f2e876d835aed84410695759e67b6bb01cd3","chromium/canvaskit.wasm":"ae8ff1d858140f7b1300ced3fa89fb8c9dce0a400a0f4f1e11f6dcfb3315fdcf","skwasm.wasm":"e540fd5e8303b7b68ec2718cb49e9c421f8ade3075b15e02a7059a62654df9a1","skwasm_heavy.wasm":"565f5cc1cca6ab120f11934b105f01fec4b58b480c82e0889dca93af8e6f8635","webparagraph/canvaskit.wasm":"0ce1b05082efdc8529550e8a01f6ff0593972d55525035010e26f5600aa9f254","wimp.wasm":"e924eaafd801d41e017d178f3fd5cf8a417f641fe35c9ed34a4e1d7582283e0c","main.dart.wasm":"5c6fbd5dcfc3e1d7070d4bf7e84d7e1057c41d362db0645619bab39edaef9646"},"builds":[{"compileTarget":"dart2wasm","renderer":"skwasm","mainWasmPath":"main.dart.wasm","jsSupportRuntimePath":"main.dart.mjs"},{"compileTarget":"dart2js","renderer":"canvaskit","mainJsPath":"main.dart.js"}]};
 
-
-(function () {
-  var loading = document.getElementById("loading");
-
-  function setStatus(text) {
-    if (loading) {
-      loading.textContent = text;
-    }
+_flutter.loader.load({
+  serviceWorkerSettings: {
+    serviceWorkerVersion: "1670134269" /* Flutter's service worker is deprecated and will be removed in a future Flutter release. */
   }
-
-  function showError(err) {
-    if (!loading) {
-      return;
-    }
-    loading.textContent =
-      "Could not start RhytmVox. " +
-      (err && err.message ? err.message : String(err));
-  }
-
-  if (typeof WebAssembly !== "undefined" && WebAssembly.compileStreaming) {
-    var originalCompileStreaming = WebAssembly.compileStreaming.bind(WebAssembly);
-    WebAssembly.compileStreaming = function (source) {
-      return originalCompileStreaming(source).catch(function (error) {
-        return Promise.resolve(source)
-          .then(function (response) {
-            if (!response || !response.arrayBuffer) {
-              throw error;
-            }
-            return response.arrayBuffer();
-          })
-          .then(function (bytes) {
-            return WebAssembly.compile(bytes);
-          });
-      });
-    };
-  }
-
-  var config = {
-    canvasKitBaseUrl: "canvaskit/",
-    canvasKitVariant: "full",
-    useLocalCanvasKit: true,
-  };
-
-  setStatus("Loading…");
-  _flutter.loader
-    .load({
-      config: config,
-      onEntrypointLoaded: async function (engineInitializer) {
-        setStatus("Starting…");
-        try {
-          var appRunner = await engineInitializer.initializeEngine(config);
-          await appRunner.runApp();
-          if (loading) {
-            loading.remove();
-          }
-        } catch (err) {
-          showError(err);
-          throw err;
-        }
-      },
-    })
-    .catch(showError);
-})();
+});
